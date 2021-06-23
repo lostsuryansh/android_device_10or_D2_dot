@@ -1442,6 +1442,7 @@ int QCamera3HardwareInterface::configureStreamsPerfLocked(
     LOGD("mOpMode: %d", mOpMode);
 
     mCurrentSceneMode = 0;
+    m_fwAeMode = ANDROID_CONTROL_AE_MODE_ON;
 
     /* first invalidate all the steams in the mStreamList
      * if they appear again, they will be validated */
@@ -3025,7 +3026,7 @@ void QCamera3HardwareInterface::handleMetadataWithLock(
                 i->bUrgentReceived = 1;
                 // Extract 3A metadata
                 result.result =
-                    translateCbUrgentMetadataToResultMetadata(metadata);
+                    translateCbUrgentMetadataToResultMetadata(metadata, i->fwkAeMode);
                 // Populate metadata result
                 result.frame_number = urgent_frame_number;
                 result.num_output_buffers = 0;
@@ -4647,6 +4648,13 @@ no_error:
     }
     pendingRequest.capture_intent = mCaptureIntent;
 
+    if (meta.exists(ANDROID_CONTROL_AE_MODE)) {
+          pendingRequest.fwkAeMode = (uint8_t)meta.find(ANDROID_CONTROL_AE_MODE).data.u8[0];
+          m_fwAeMode = pendingRequest.fwkAeMode;
+    } else {
+          pendingRequest.fwkAeMode = m_fwAeMode;
+    }
+
     //extract CAC info
     if (meta.exists(ANDROID_COLOR_CORRECTION_ABERRATION_MODE)) {
         mCacMode =
@@ -6222,12 +6230,6 @@ QCamera3HardwareInterface::translateFromHalMetadata(
                 hAeRegions->rect.height);
     }
 
-    IF_META_AVAILABLE(uint32_t, afState, CAM_INTF_META_AF_STATE, metadata) {
-        uint8_t fwk_afState = (uint8_t) *afState;
-        camMetadata.update(ANDROID_CONTROL_AF_STATE, &fwk_afState, 1);
-        LOGD("urgent Metadata : ANDROID_CONTROL_AF_STATE %u", *afState);
-    }
-
     IF_META_AVAILABLE(float, focusDistance, CAM_INTF_META_LENS_FOCUS_DISTANCE, metadata) {
         camMetadata.update(ANDROID_LENS_FOCUS_DISTANCE , focusDistance, 1);
     }
@@ -6588,7 +6590,7 @@ mm_jpeg_exif_params_t QCamera3HardwareInterface::get3AExifParams()
  *==========================================================================*/
 camera_metadata_t*
 QCamera3HardwareInterface::translateCbUrgentMetadataToResultMetadata
-                                (metadata_buffer_t *metadata)
+                                (metadata_buffer_t *metadata, uint8_t fwkAeMode)
 {
     CameraMetadata camMetadata;
     camera_metadata_t *resultMetadata;
@@ -6615,6 +6617,12 @@ QCamera3HardwareInterface::translateCbUrgentMetadataToResultMetadata
         uint8_t fwk_ae_state = (uint8_t) *ae_state;
         camMetadata.update(ANDROID_CONTROL_AE_STATE, &fwk_ae_state, 1);
         LOGD("urgent Metadata : ANDROID_CONTROL_AE_STATE %u", *ae_state);
+    }
+
+    IF_META_AVAILABLE(uint32_t, afState, CAM_INTF_META_AF_STATE, metadata) {
+        uint8_t fwk_afState = (uint8_t) *afState;
+        camMetadata.update(ANDROID_CONTROL_AF_STATE, &fwk_afState, 1);
+        LOGD("urgent Metadata : ANDROID_CONTROL_AF_STATE %u", *afState);
     }
 
     IF_META_AVAILABLE(uint32_t, focusMode, CAM_INTF_PARM_FOCUS_MODE, metadata) {
@@ -6665,6 +6673,7 @@ QCamera3HardwareInterface::translateCbUrgentMetadataToResultMetadata
         redeye = *pRedeye;
     }
 
+
     if (1 == redeye) {
         fwk_aeMode = ANDROID_CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE;
         camMetadata.update(ANDROID_CONTROL_AE_MODE, &fwk_aeMode, 1);
@@ -6678,7 +6687,10 @@ QCamera3HardwareInterface::translateCbUrgentMetadataToResultMetadata
             LOGE("Unsupported flash mode %d", flashMode);
         }
     } else if (aeMode == CAM_AE_MODE_ON) {
-        fwk_aeMode = ANDROID_CONTROL_AE_MODE_ON;
+        if (CAM_FLASH_MODE_OFF == flashMode)
+            fwk_aeMode = fwkAeMode;
+        else
+            fwk_aeMode = ANDROID_CONTROL_AE_MODE_ON;
         camMetadata.update(ANDROID_CONTROL_AE_MODE, &fwk_aeMode, 1);
     } else if (aeMode == CAM_AE_MODE_OFF) {
         fwk_aeMode = ANDROID_CONTROL_AE_MODE_OFF;
@@ -9992,7 +10004,10 @@ int QCamera3HardwareInterface::translateToHalMetadata
         if (frame_settings.exists(ANDROID_CONTROL_AE_MODE)) {
             uint8_t fwk_aeMode =
                 frame_settings.find(ANDROID_CONTROL_AE_MODE).data.u8[0];
-            if (fwk_aeMode > ANDROID_CONTROL_AE_MODE_ON) {
+            uint8_t fwk_flashMode =
+                 frame_settings.find(ANDROID_FLASH_MODE).data.u8[0];
+            if ((fwk_aeMode > ANDROID_CONTROL_AE_MODE_ON) &&
+                 (fwk_flashMode != ANDROID_FLASH_MODE_OFF)) {
                 respectFlashMode = 0;
                 LOGH("AE Mode controls flash, ignore android.flash.mode");
             }

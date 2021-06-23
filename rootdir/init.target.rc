@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+# Copyright (c) 2014-2016,2020, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -38,12 +38,8 @@ on fs
     # Set permissions for persist partition
     chown root system /mnt/vendor/persist
     chmod 0771 /mnt/vendor/persist
-    mkdir /mnt/vendor/persist/alarm 0770 system system
-    mkdir /mnt/vendor/persist/bluetooth 0770 bluetooth bluetooth
-    mkdir /mnt/vendor/persist/data 0700 system system
-    mkdir /mnt/vendor/persist/display 0770 system graphics
-    mkdir /mnt/vendor/persist/time 0770 system system
     restorecon_recursive /mnt/vendor/persist
+    mkdir /mnt/vendor/persist/data 0700 system system
 
     setprop sys.usb.ffs.aio_compat 1
 
@@ -82,7 +78,7 @@ service thermal-engine /vendor/bin/thermal-engine -c ${sys.qcom.thermalcfg:-/ven
     group root
 
 service wcnss-service /vendor/bin/wcnss_service
-    class late_start
+    class main
     user system
     group system wifi radio
     oneshot
@@ -100,7 +96,6 @@ service vendor.imsdatadaemon /system/vendor/bin/imsdatadaemon
     user system
     socket ims_datad stream 0660 system radio
     group system wifi radio inet log diag
-    writepid /dev/cpuset/system-background/tasks
     disabled
 
 on property:vendor.ims.QMI_DAEMON_STATUS=1
@@ -115,7 +110,6 @@ service vendor.imsrcsservice /vendor/bin/imsrcsd
     class main
     user system
     group radio diag inet log
-    writepid /dev/cpuset/system-background/tasks
 
 on property:vendor.ims.DATA_DAEMON_STATUS=1
     restart vendor.ims_rtp_daemon

@@ -14,4 +14,7 @@
 # limitations under the License.
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/dot_D2.mk
+    $(LOCAL_DIR)/lineage_D2.mk
+
+COMMON_LUNCH_CHOICES := \
+     lineage_D2-userdebug

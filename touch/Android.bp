@@ -13,8 +13,8 @@
 // limitations under the License.
 
 cc_binary {
-    name: "vendor.lineage.touch@1.0-service.riva",
-    init_rc: ["vendor.lineage.touch@1.0-service.riva.rc"],
+    name: "vendor.lineage.touch@1.0-service.D2",
+    init_rc: ["vendor.lineage.touch@1.0-service.D2.rc"],
     defaults: ["hidl_defaults"],
     relative_install_path: "hw",
     vendor: true,
@@ -28,5 +28,8 @@ cc_binary {
         "libhidltransport",
         "libutils",
         "vendor.lineage.touch@1.0",
+    ],
+    header_libs: [
+        "libbinder_headers",
     ],
 }

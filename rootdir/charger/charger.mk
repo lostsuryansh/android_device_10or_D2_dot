@@ -1,5 +1,5 @@
 PRODUCT_COPY_FILES += \
-    device/10or/D2/rootdir/charger/chargeonlymode:$(TARGET_OUT_DIR)/root/sbin/charger \
+    device/10or/D2/rootdir/charger/chargeonlymode:$(TARGET_COPY_OUT_SYSTEM)/bin/charger \
     device/10or/D2/rootdir/charger/battery_image_0.png:$(TARGET_OUT_DIR)/root/res/images/charger/battery_image_0.png \
     device/10or/D2/rootdir/charger/battery_image_1.png:$(TARGET_OUT_DIR)/root/res/images/charger/battery_image_1.png \
     device/10or/D2/rootdir/charger/battery_image_2.png:$(TARGET_OUT_DIR)/root/res/images/charger/battery_image_2.png \
