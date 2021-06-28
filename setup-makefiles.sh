@@ -21,7 +21,7 @@ set -e
 DEVICE=D2
 VENDOR=10or
 
-INITIAL_COPYRIGHT_YEAR=2019
+INITIAL_COPYRIGHT_YEAR=2018
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"

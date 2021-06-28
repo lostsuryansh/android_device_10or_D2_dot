@@ -58,7 +58,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.vendor.camera.display.umax=1920x1080 \
     persist.vendor.camera.display.lmax=1280x720 \
     persist.vendor.qti.telephony.vt_cam_interface=1 \
-    persist.vendor.camera.gyro.android=0 \
+    persist.vendor.camera.gyro.android=1 \
     persist.vendor.camera.HAL3.enabled=1 \
     persist.vendor.camera.is_type=1 \
     vendor.camera.hal1.packagelist=com.whatsapp,com.intsig.camscanner,com.instagram.android,com.snapchat.android \
@@ -70,11 +70,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Dalvik
 PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.heapstartsize=8m \
-    dalvik.vm.heapgrowthlimit=192m \
+    dalvik.vm.heapstartsize=16m \
+    dalvik.vm.heapgrowthlimit=256m \
     dalvik.vm.heapsize=512m \
     dalvik.vm.heaptargetutilization=0.75 \
-    dalvik.vm.heapminfree=512k \
+    dalvik.vm.heapminfree=4m \
     dalvik.vm.heapmaxfree=8m
 
 # Display
@@ -83,6 +83,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.display.cabl=2 \
     ro.sf.lcd_density=295 \
     vendor.display.enable_default_color_mode=1
+
+# Enforce privapp-permissions whitelist
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.control_privapp_permissions=enforce
 
 # Fm
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -99,11 +103,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Graphics
 PRODUCT_PROPERTY_OVERRIDES += \
-    debug.egl.hw=0 \
-    debug.enable.sglscale=1 \
-    debug.mdpcomp.logs=0 \
+    debug.egl.hw=1 \
+    debug.cpurend.vsync=false \
+    debug.gralloc.gfx_ubwc_disable=0 \
+    debug.hwui.use_buffer_age=false \
     debug.sdm.support_writeback=0 \
-    debug.sf.hw=0 \
+    debug.sf.disable_backpressure=1 \
+    debug.sf.hw=1 \
     debug.sf.latch_unsignaled=1 \
     debug.sf.recomputecrop=0 \
     dev.pm.dyn_samplingrate=1 \
@@ -124,17 +130,22 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     mm.enable.qcom_parser=4176895 \
     media.stagefright.audio.sink=280 \
-    debug.stagefright.omx_default_rank.sw-audio=1 \
-    debug.stagefright.omx_default_rank=0 \
     vendor.vidc.disable.split.mode=1 \
     vendor.vidc.enc.disable_bframes=1 \
     vendor.vidc.enc.disable_pframes=1 \
     vendor.vidc.enc.disable.pq=true \
     vendor.vidc.enc.narrow.searchrange=1
 
+# Memory optimizations
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.vendor.qti.sys.fw.bservice_enable=true \
+    ro.vendor.qti.am.reschedule_service=true
+
 # Perf
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=libqti-perfd-client.so \
+    ro.vendor.qti.sys.fw.bg_apps_limit=60 \
+    vendor.perf.gestureflingboost.enable=true
 
 # Radio
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -151,6 +162,18 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # Time Services
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.vendor.delta_time.enable=true \
+
+# Trim properties
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.vendor.qti.sys.fw.use_trim_settings=true \
+    ro.vendor.qti.sys.fw.empty_app_percent=50 \
+    ro.vendor.qti.sys.fw.trim_empty_percent=100 \
+    ro.vendor.qti.sys.fw.trim_cache_percent=100 \
+    ro.vendor.qti.sys.fw.trim_enable_memory=2147483648
+
+# UI
+PRODUCT_PROPERTY_OVERRIDES += \
+    sys.use_fifo_ui=1
 
 # Usb
 PRODUCT_PROPERTY_OVERRIDES += \
